@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0f1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>EduFísica Pro</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="app">
+
+  <!-- ════════════ SCREEN: HOME ════════════ -->
+  <div id="screen-home" class="screen active">
+    <header class="app-header">
+      <div>
+        <p id="hdr-escuela" class="header-school">EduFísica Pro</p>
+        <h1 id="hdr-profesor" class="header-teacher">Toca aquí para configurar →</h1>
+      </div>
+      <button class="icon-btn" onclick="goTo('config')"><i class="fas fa-cog"></i></button>
+    </header>
+    <div class="screen-content">
+      <div class="stats-row">
+        <div class="stat-card"><span class="stat-num" id="stat-alumnos">0</span><span class="stat-label">Alumnos</span></div>
+        <div class="stat-card"><span class="stat-num" id="stat-clases">0</span><span class="stat-label">Clases</span></div>
+        <div class="stat-card"><span class="stat-num" id="stat-evals">0</span><span class="stat-label">Evaluaciones</span></div>
+      </div>
+      <h2 class="section-title">Acceso Rápido</h2>
+      <div class="action-grid">
+        <button class="action-btn" style="--c:#3b82f6" onclick="goTo('alumnos')">
+          <i class="fas fa-users"></i><span>Gestión de<br>Alumnos</span>
+        </button>
+        <button class="action-btn" style="--c:#10b981" onclick="goTo('asistencia')">
+          <i class="fas fa-clipboard-check"></i><span>Pasar<br>Asistencia</span>
+        </button>
+        <button class="action-btn" style="--c:#8b5cf6" onclick="goTo('evaluaciones')">
+          <i class="fas fa-star-half-alt"></i><span>Registrar<br>Evaluaciones</span>
+        </button>
+        <button class="action-btn" style="--c:#f59e0b" onclick="goTo('informes')">
+          <i class="fas fa-file-excel"></i><span>Generar<br>Informes</span>
+        </button>
+      </div>
+      <h2 class="section-title">Mis Grados</h2>
+      <div id="home-grados" class="grados-list"></div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: CONFIG ════════════ -->
+  <div id="screen-config" class="screen">
+    <header class="app-header">
+      <button class="back-btn" onclick="goTo('home')"><i class="fas fa-arrow-left"></i></button>
+      <h1 class="header-title">Configuración</h1>
+      <div></div>
+    </header>
+    <div class="screen-content">
+      <div class="form-card">
+        <h3 class="form-section-title"><i class="fas fa-school" style="color:#3b82f6"></i> Institución</h3>
+        <div class="form-group"><label>Nombre de la Escuela</label><input type="text" id="cfg-escuela" placeholder="U.E. Ejemplo..."></div>
+        <div class="form-group"><label>Profesor/a</label><input type="text" id="cfg-profesor" placeholder="Prof. Nombre Apellido"></div>
+        <div class="form-group"><label>Año Escolar</label><input type="text" id="cfg-anio" placeholder="2024-2025"></div>
+        <div class="form-group"><label>Área / Asignatura</label><input type="text" id="cfg-materia" value="Educación Física"></div>
+      </div>
+      <div class="form-card mt-3">
+        <h3 class="form-section-title"><i class="fas fa-sliders-h" style="color:#8b5cf6"></i> Calificaciones</h3>
+        <div class="form-group"><label>Escala de notas</label>
+          <select id="cfg-escala">
+            <option value="20">1 – 20 (Venezolana)</option>
+            <option value="10">1 – 10</option>
+            <option value="100">0 – 100</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Nota mínima para aprobar</label><input type="number" id="cfg-minima" placeholder="10" min="1"></div>
+      </div>
+      <button class="btn-primary w-full mt-4" onclick="guardarConfig()"><i class="fas fa-save"></i> Guardar Configuración</button>
+      <!-- Respaldo -->
+      <div class="form-card mt-3 backup-card">
+        <h3 class="form-section-title"><i class="fas fa-cloud" style="color:#34d399"></i> Respaldo de Datos</h3>
+        <p class="text-muted small mb-2">Exporta tus datos a un archivo y guárdalo en Google Drive. Para restaurar, descarga el archivo de Drive e impórtalo aquí.</p>
+        <div class="backup-btn-row">
+          <button class="backup-btn export" onclick="exportarRespaldo()">
+            <i class="fas fa-cloud-upload-alt"></i><span>Exportar<br>Respaldo</span>
+          </button>
+          <button class="backup-btn import" onclick="document.getElementById('import-file').click()">
+            <i class="fas fa-cloud-download-alt"></i><span>Importar<br>Respaldo</span>
+          </button>
+        </div>
+        <div class="backup-info" id="backup-info">Sin respaldo reciente</div>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importarRespaldo(event)">
+      </div>
+      <!-- Nuevo Año Escolar -->
+      <div class="form-card mt-3" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.05)">
+        <h3 class="form-section-title" style="color:#f87171"><i class="fas fa-rotate-right" style="color:#f87171"></i> Año Escolar</h3>
+        <p class="text-muted small mb-2">Inicia un nuevo año manteniendo los grados y alumnos, pero borrando asistencias y evaluaciones del año anterior.</p>
+        <button class="btn-secondary w-full" style="border-color:rgba(239,68,68,.4);color:#f87171" onclick="nuevoAnioEscolar()">
+          <i class="fas fa-rotate-right"></i> Iniciar Nuevo Año Escolar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: ALUMNOS ════════════ -->
+  <div id="screen-alumnos" class="screen">
+    <header class="app-header">
+      <button class="back-btn" onclick="backAlumnos()"><i class="fas fa-arrow-left"></i></button>
+      <h1 id="alumnos-title" class="header-title">Gestión de Alumnos</h1>
+      <button class="icon-btn" id="btn-add-alumno" onclick="modalAlumno()" style="display:none"><i class="fas fa-plus"></i></button>
+    </header>
+    <div class="screen-content">
+      <div id="alumnos-picker">
+        <p class="screen-subtitle">Selecciona el grado</p>
+        <div id="alumnos-grado-grid" class="grado-picker-grid"></div>
+      </div>
+      <div id="alumnos-lista-view" style="display:none">
+        <div class="info-banner" id="alumnos-banner"></div>
+        <div id="alumnos-filter-bar"></div>
+        <div id="alumnos-lista" class="student-list"></div>
+        <div class="form-card mt-3">
+          <h3 class="form-section-title"><i class="fas fa-list-ul"></i> Agregar varios alumnos</h3>
+          <p class="text-muted small mb-2">Un nombre por línea</p>
+          <textarea id="bulk-names" rows="6" placeholder="Juan Pérez&#10;María González&#10;Carlos López..."></textarea>
+          <button class="btn-primary w-full mt-3" onclick="agregarBulk()"><i class="fas fa-plus-circle"></i> Agregar Lista</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: ASISTENCIA ════════════ -->
+  <div id="screen-asistencia" class="screen">
+    <header class="app-header">
+      <button class="back-btn" onclick="backAsistencia()"><i class="fas fa-arrow-left"></i></button>
+      <h1 id="asistencia-title" class="header-title">Asistencia</h1>
+      <div id="att-progress-badge" class="progress-badge" style="display:none"></div>
+    </header>
+    <div class="screen-content">
+      <!-- Step 1: setup -->
+      <div id="att-setup">
+        <div class="form-card">
+          <h3 class="form-section-title"><i class="fas fa-calendar-day" style="color:#f59e0b"></i> Fecha de Clase</h3>
+          <input type="date" id="att-fecha" class="date-input">
+        </div>
+        <p class="screen-subtitle mt-4">Selecciona el grado</p>
+        <div id="att-grado-grid" class="grado-picker-grid"></div>
+      </div>
+      <!-- Step 2: card mode -->
+      <div id="att-card-mode" style="display:none">
+        <div class="attendance-card">
+          <div class="att-counter" id="att-counter">1 / 1</div>
+          <div class="att-name" id="att-name">Nombre</div>
+          <div class="att-buttons">
+            <button class="att-btn presente" onclick="marcarAtt(true)">
+              <i class="fas fa-check"></i><span>PRESENTE</span>
+            </button>
+            <button class="att-btn ausente" onclick="marcarAtt(false)">
+              <i class="fas fa-times"></i><span>AUSENTE</span>
+            </button>
+          </div>
+          <button class="link-btn mt-3" onclick="toggleModoLista()"><i class="fas fa-list"></i> Ver lista completa</button>
+        </div>
+      </div>
+      <!-- Step 2 alt: list mode -->
+      <div id="att-list-mode" style="display:none">
+        <div id="att-full-list" class="att-full-list"></div>
+        <div class="btn-row mt-4">
+          <button class="btn-secondary" onclick="toggleModoLista()"><i class="fas fa-id-card"></i> Modo tarjeta</button>
+          <button class="btn-primary" onclick="finalizarAsistencia()"><i class="fas fa-check-double"></i> Finalizar</button>
+        </div>
+      </div>
+      <!-- Step 3: summary -->
+      <div id="att-summary" style="display:none">
+        <div class="summary-card">
+          <i class="fas fa-check-circle" style="color:#10b981;font-size:3rem"></i>
+          <h2 class="mt-3 font-black text-xl">¡Asistencia guardada!</h2>
+          <p id="att-summary-text" class="text-muted mt-2"></p>
+          <div id="att-summary-list" class="summary-list mt-4"></div>
+          <button class="btn-primary w-full mt-4" onclick="goTo('home')"><i class="fas fa-home"></i> Inicio</button>
+          <button class="btn-secondary w-full mt-2" onclick="nuevaAsistencia()"><i class="fas fa-redo"></i> Otro grado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: EVALUACIONES ════════════ -->
+  <div id="screen-evaluaciones" class="screen">
+    <header class="app-header">
+      <button class="back-btn" onclick="backEval()"><i class="fas fa-arrow-left"></i></button>
+      <h1 id="eval-title" class="header-title">Evaluaciones</h1>
+      <button class="icon-btn" id="btn-add-eval" onclick="modalEval()" style="display:none"><i class="fas fa-plus"></i></button>
+    </header>
+    <div class="screen-content">
+      <!-- Step 1: grade picker -->
+      <div id="eval-picker">
+        <p class="screen-subtitle">Selecciona el grado</p>
+        <div id="eval-grado-grid" class="grado-picker-grid"></div>
+      </div>
+      <!-- Step 2: eval list -->
+      <div id="eval-list-view" style="display:none">
+        <div id="eval-ponderado-total" class="ponderado-banner"></div>
+        <div id="eval-lista" class="eval-list"></div>
+      </div>
+      <!-- Step 3: grade entry -->
+      <div id="eval-entry-view" style="display:none">
+        <div class="form-card" id="eval-entry-header"></div>
+        <div id="eval-entry-lista" class="eval-entry-list"></div>
+        <button class="btn-primary w-full mt-4" onclick="guardarNotas()"><i class="fas fa-save"></i> Guardar Notas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SCREEN: INFORMES ════════════ -->
+  <div id="screen-informes" class="screen">
+    <header class="app-header">
+      <button class="back-btn" onclick="backInformes()"><i class="fas fa-arrow-left"></i></button>
+      <h1 id="informes-title" class="header-title">Informes</h1>
+      <div></div>
+    </header>
+    <div class="screen-content">
+      <div id="informes-picker">
+        <p class="screen-subtitle">Selecciona el grado</p>
+        <div id="informes-grado-grid" class="grado-picker-grid"></div>
+      </div>
+      <div id="informes-view" style="display:none">
+        <!-- Export buttons -->
+        <div class="form-card">
+          <h3 class="form-section-title"><i class="fas fa-file-export" style="color:#10b981"></i> Exportar</h3>
+          <div class="btn-row">
+            <button class="export-btn green" onclick="exportarExcel('asistencia')">
+              <i class="fas fa-file-excel"></i><span>Asistencia<br>Excel</span>
+            </button>
+            <button class="export-btn blue" onclick="exportarExcel('notas')">
+              <i class="fas fa-file-excel"></i><span>Notas<br>Excel</span>
+            </button>
+            <button class="export-btn amber" onclick="exportarExcel('consolidado')">
+              <i class="fas fa-file-excel"></i><span>Informe<br>Completo</span>
+            </button>
+          </div>
+        </div>
+        <!-- Preview: Attendance -->
+        <div class="form-card mt-3">
+          <h3 class="form-section-title"><i class="fas fa-clipboard-list" style="color:#f59e0b"></i> Resumen de Asistencia</h3>
+          <div id="informe-asistencia-preview" class="informe-preview"></div>
+        </div>
+        <!-- Preview: Grades -->
+        <div class="form-card mt-3">
+          <h3 class="form-section-title"><i class="fas fa-star-half-alt" style="color:#8b5cf6"></i> Resumen de Notas</h3>
+          <div id="informe-notas-preview" class="informe-preview"></div>
+        </div>
+        <!-- Preview: Por Evaluación -->
+        <div class="form-card mt-3">
+          <h3 class="form-section-title"><i class="fas fa-clipboard-list" style="color:#ec4899"></i> Informe por Evaluación</h3>
+          <p class="text-muted small mb-2">Resultados detallados de cada evaluación con escala de letras A–E.</p>
+          <div id="informe-eval-individual" class="informe-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #app -->
+
+<!-- ════════════ MODALS ════════════ -->
+<div id="modal-overlay" class="modal-overlay" onclick="cerrarModal()">
+  <div id="modal-box" class="modal-box" onclick="event.stopPropagation()">
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+<script src="app2.js"></script>
+</body>
+</html>
